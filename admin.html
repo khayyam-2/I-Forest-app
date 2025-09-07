@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forest Watch - Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin-styles.css" />
+</head>
+<body>
+    <header class="admin-header">
+        <div class="status-bar"></div>
+        <div class="title-bar">
+            <h1>Forest Watch - Admin Dashboard</h1>
+            <nav class="admin-nav">
+                <a href="index.html" class="nav-link">Client View</a>
+                <button id="clearData" class="btn-clear">Clear All Data</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="admin-content">
+        <div class="admin-stats">
+            <div class="stat-card">
+                <h3>Total Reports</h3>
+                <span id="totalReports">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>With Images</h3>
+                <span id="reportsWithImages">0</span>
+            </div>
+            <div class="stat-card">
+                <h3>Today's Reports</h3>
+                <span id="todayReports">0</span>
+            </div>
+        </div>
+
+        <div class="reports-section">
+            <h2>Submitted Reports</h2>
+            <div class="filter-controls">
+                <input type="text" id="searchInput" placeholder="Search reports..." class="search-input" />
+                <select id="filterSelect" class="filter-select">
+                    <option value="all">All Reports</option>
+                    <option value="with-images">With Images</option>
+                    <option value="today">Today Only</option>
+                </select>
+            </div>
+            <div id="reportsList" class="reports-list">
+                <div class="no-reports">
+                    <p>No reports submitted yet.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>

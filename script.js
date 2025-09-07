@@ -78,6 +78,9 @@ document.addEventListener('DOMContentLoaded', function () {
       // Store image data automatically
       storeImageData(selectedImageData);
       
+      // Show success toast
+      showToast('success', 'Image Selected!', `"${imageName}" has been selected successfully.`);
+      
       console.log('Image selected:', selectedImageData);
     });
   });
@@ -108,6 +111,9 @@ document.addEventListener('DOMContentLoaded', function () {
           
           // Store image data automatically
           storeImageData(selectedImageData);
+          
+          // Show success toast
+          showToast('success', 'Image Uploaded!', `"${file.name}" has been uploaded successfully.`);
           
           console.log('Custom image uploaded:', selectedImageData);
         };
@@ -157,13 +163,33 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store updated data
         storeImageData(selectedImageData);
         
+        // Create standalone image report for admin page
+        const imageReport = {
+          id: generateReportId(),
+          timestamp: new Date().toISOString(),
+          message: `Image sent: ${selectedImageName}`,
+          hasImage: true,
+          imageData: selectedImageData.src,
+          type: 'image-only',
+          imageName: selectedImageName,
+          imageType: selectedImageData.type,
+          imageSize: selectedImageData.size
+        };
+        
+        // Store image report in admin format
+        storeImageReport(imageReport);
+        
         // Show success message with details
         const message = `Image "${selectedImageName}" has been sent successfully!\n\n` +
                        `Type: ${selectedImageData.type}\n` +
                        `Size: ${selectedImageData.size ? formatFileSize(selectedImageData.size) : 'Sample Image'}\n` +
-                       `Sent at: ${new Date().toLocaleString()}`;
+                       `Sent at: ${new Date().toLocaleString()}\n\n` +
+                       `The image is now visible in the admin dashboard.`;
         
         showPopup('Success', message);
+        
+        // Show toast notification
+        showToast('success', 'Image Sent!', `"${selectedImageName}" has been sent to admin dashboard.`);
         
         // Reset button
         this.textContent = originalText;
@@ -280,6 +306,9 @@ document.addEventListener('DOMContentLoaded', function () {
       
       showPopup('Success', successMessage);
       
+      // Show toast notification
+      showToast('success', 'Report Submitted!', 'Your report has been submitted successfully and will appear in the admin dashboard.');
+      
       // Reset form
       form.reset();
       resetImageSelection();
@@ -295,19 +324,43 @@ document.addEventListener('DOMContentLoaded', function () {
   // Store submission data
   function storeSubmissionData(submissionData) {
     try {
-      let submissions = JSON.parse(localStorage.getItem('forestWatchSubmissions') || '[]');
-      submissions.push(submissionData);
+      // Create report in the format expected by admin page
+      const report = {
+        id: generateReportId(),
+        timestamp: new Date().toISOString(),
+        message: submissionData.mobile + (submissionData.message ? '\n\nAdditional Message: ' + submissionData.message : ''),
+        hasImage: !!submissionData.image,
+        imageData: submissionData.image ? submissionData.image.src : null
+      };
+
+      // Store in the format expected by admin page
+      let reports = JSON.parse(localStorage.getItem('forestWatchReports') || '[]');
+      reports.push(report);
       
-      // Keep only last 100 submissions
-      if (submissions.length > 100) {
-        submissions = submissions.slice(-100);
+      // Keep only last 100 reports
+      if (reports.length > 100) {
+        reports = reports.slice(-100);
       }
       
-      localStorage.setItem('forestWatchSubmissions', JSON.stringify(submissions));
-      console.log('Submission stored. Total submissions:', submissions.length);
+      localStorage.setItem('forestWatchReports', JSON.stringify(reports));
+      
+      // Trigger storage event for admin page
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'forestWatchReports',
+        newValue: JSON.stringify(reports)
+      }));
+      
+      console.log('Report stored. Total reports:', reports.length);
     } catch (error) {
-      console.error('Error storing submission:', error);
+      console.error('Error storing report:', error);
     }
+  }
+
+  // Generate unique report ID
+  function generateReportId() {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5);
+    return `FW${timestamp}${random}`.toUpperCase();
   }
 
   // Add interactive effects
@@ -346,6 +399,55 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+
+  // Toast Notification System
+  function showToast(type, title, message, duration = 3000) {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✅',
+      error: '❌',
+      warning: '⚠️',
+      info: 'ℹ️'
+    };
+    
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type] || icons.info}</div>
+      <div class="toast-content">
+        <div class="toast-title">${title}</div>
+        <div class="toast-message">${message}</div>
+      </div>
+      <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+      <div class="toast-progress animate"></div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    // Auto remove
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 300);
+    }, duration);
+    
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.remove();
+        }
+      }, 300);
+    });
+  }
 
   // Initialize the app
   console.log('Forest Watch App initialized successfully!');
