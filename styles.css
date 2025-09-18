@@ -107,6 +107,58 @@ body {
   font-size: 18px;
 }
 
+.location-info {
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.location-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.location-status.loading {
+  color: #6c757d;
+}
+
+.location-status.success {
+  color: var(--green-700);
+}
+
+.location-status.error {
+  color: #dc3545;
+}
+
+.btn-location {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-location:hover {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+.btn-location:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .image-preview-container {
   position: relative;
   margin-bottom: 16px;

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Forest Watch - Management Dashboard</title>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+	<style>
+		body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 0; background: #f5f6f8; }
+		header { background: #0b6b1e; color: #fff; padding: 16px 20px; font-size: 20px; }
+		.container { padding: 16px; max-width: 1100px; margin: 0 auto; }
+		.grid { display: grid; grid-template-columns: 1fr 400px; gap: 16px; }
+		#map { height: 520px; width: 100%; border-radius: 8px; border: 1px solid #d0d7de; }
+		.card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+		.img-wrap { display:flex; align-items:center; justify-content:center; background:#fafafa; border:1px dashed #cbd5e1; border-radius:8px; height:280px; overflow:hidden }
+		.img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+		.meta { margin-top: 8px; font-size: 14px; color: #334155; }
+		.meta b { color:#0b6b1e }
+		.badge { display:inline-block; padding:2px 8px; background:#14532d; color:#fff; border-radius:999px; font-size:12px }
+
+		/* Modal */
+		.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.55); z-index: 1000; }
+		.modal.open { display: flex; }
+		.modal .box { background: #fff; padding: 20px; border-radius: 10px; width: min(520px, 92vw); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+		.modal .box h2 { margin: 0 0 8px; color: #991b1b; }
+		.modal .actions { margin-top: 12px; display:flex; gap: 8px; justify-content: flex-end; }
+		button { cursor: pointer; border: none; border-radius: 6px; padding: 10px 14px; font-weight: 600; }
+		button.primary { background:#0b6b1e; color:#fff }
+		button.secondary { background:#e2e8f0; color:#0f172a }
+	</style>
+</head>
+<body>
+	<header>Forest Watch - Management Dashboard <span id="status" class="badge" title="WebSocket status">connecting…</span></header>
+	<div class="container">
+		<div class="grid">
+			<div class="card">
+				<div id="map"></div>
+			</div>
+			<div class="card">
+				<div class="img-wrap">
+					<img id="alert-image" alt="Alert image" src="" />
+				</div>
+				<div class="meta">
+					<div>Message: <b id="alert-message">No alerts yet</b></div>
+					<div>Latitude: <b id="lat">—</b></div>
+					<div>Longitude: <b id="lng">—</b></div>
+					<div>Time: <b id="time">—</b></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="alert-modal" role="dialog" aria-modal="true" aria-labelledby="alert-title">
+		<div class="box">
+			<h2 id="alert-title">Emergency alert received!</h2>
+			<p id="alert-desc">A new help request has arrived. Please review and take action.</p>
+			<div class="actions">
+				<button class="secondary" id="mute">Mute sound</button>
+				<button class="primary" id="ack">Acknowledge</button>
+			</div>
+		</div>
+	</div>
+
+	<audio id="siren" preload="auto">
+		<source src="https://freesound.org/data/previews/341/341695_5858296-lq.mp3" type="audio/mpeg" />
+	</audio>
+
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const statusEl = document.getElementById('status');
+		const latEl = document.getElementById('lat');
+		const lngEl = document.getElementById('lng');
+		const timeEl = document.getElementById('time');
+		const msgEl = document.getElementById('alert-message');
+		const imgEl = document.getElementById('alert-image');
+		const modal = document.getElementById('alert-modal');
+		const siren = document.getElementById('siren');
+
+		const map = L.map('map').setView([30.3753, 69.3451], 5);
+		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 19,
+			attribution: '© OpenStreetMap'
+		}).addTo(map);
+		let marker = null;
+
+		function updateMap(lat, lng) {
+			if (!marker) {
+				marker = L.marker([lat, lng]).addTo(map);
+			} else {
+				marker.setLatLng([lat, lng]);
+			}
+			map.setView([lat, lng], 16);
+		}
+
+		function showModal() {
+			modal.classList.add('open');
+			try { siren.currentTime = 0; siren.play(); } catch (e) {}
+		}
+		function hideModal() {
+			modal.classList.remove('open');
+		}
+		document.getElementById('ack').addEventListener('click', hideModal);
+		document.getElementById('mute').addEventListener('click', () => { try { siren.pause(); } catch (e) {} });
+
+		const socket = io();
+		socket.on('connect', () => { statusEl.textContent = 'online'; });
+		socket.on('disconnect', () => { statusEl.textContent = 'offline'; });
+
+		socket.on('incoming-alert', (payload) => {
+			const { lat, lng, message, imageUrl, timestamp } = payload;
+			latEl.textContent = lat.toFixed(6);
+			lngEl.textContent = lng.toFixed(6);
+			timeEl.textContent = new Date(timestamp || Date.now()).toLocaleString();
+			msgEl.textContent = message || 'Help requested';
+			if (imageUrl) { imgEl.src = imageUrl; imgEl.style.display = 'block'; } else { imgEl.removeAttribute('src'); }
+			updateMap(lat, lng);
+			showModal();
+		});
+	</script>
+</body>
+</html>
+
+

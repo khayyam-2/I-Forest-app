@@ -9,17 +9,15 @@ document.addEventListener('DOMContentLoaded', function () {
   const imagePreview = document.getElementById('imagePreview');
   const imagePlaceholder = document.getElementById('imagePlaceholder');
   const popupModal = document.getElementById('popupModal');
-  const imageModal = document.getElementById('imageModal');
   const closePopup = document.getElementById('closePopup');
-  const closeImageModal = document.getElementById('closeImageModal');
   const popupOkBtn = document.getElementById('popupOkBtn');
   const popupTitle = document.getElementById('popupTitle');
   const popupMessage = document.getElementById('popupMessage');
-  const customImageInput = document.getElementById('customImageInput');
   const locationStatus = document.getElementById('locationStatus');
   const locationIcon = document.getElementById('locationIcon');
   const locationText = document.getElementById('locationText');
   const getLocationBtn = document.getElementById('getLocationBtn');
+  const locationWarning = document.getElementById('locationWarning');
 
   // State variables
   let selectedImage = null;
@@ -32,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function getCurrentLocation() {
     if (!navigator.geolocation) {
       updateLocationStatus('error', 'Geolocation is not supported by this browser.');
+      showLocationWarning();
       return;
     }
 
@@ -50,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         locationPermissionGranted = true;
         updateLocationStatus('success', `Location: ${currentLocation.latitude.toFixed(6)}, ${currentLocation.longitude.toFixed(6)}`);
         getLocationBtn.disabled = false;
+        hideLocationWarning();
         
         showToast('success', 'Location Captured!', 'GPS coordinates have been successfully captured.');
         console.log('Location captured:', currentLocation);
@@ -73,12 +73,13 @@ document.addEventListener('DOMContentLoaded', function () {
         
         updateLocationStatus('error', errorMessage);
         getLocationBtn.disabled = false;
+        showLocationWarning();
         showToast('error', 'Location Error', errorMessage);
         console.error('Location error:', error);
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 300000 // 5 minutes
       }
     );
@@ -103,86 +104,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  function showLocationWarning() {
+    locationWarning.style.display = 'block';
+  }
+
+  function hideLocationWarning() {
+    locationWarning.style.display = 'none';
+  }
+
   // Get location button event listener
   getLocationBtn.addEventListener('click', getCurrentLocation);
 
   // Auto-get location on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    // Try to get location automatically
-    setTimeout(() => {
-      if (!locationPermissionGranted) {
-        getCurrentLocation();
-      }
-    }, 1000);
-  });
-
-  // Image Selection Modal
-  selectImageBtn.addEventListener('click', function() {
-    imageModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  });
-
-  closeImageModal.addEventListener('click', function() {
-    imageModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  });
-
-  // Close modal when clicking outside
-  imageModal.addEventListener('click', function(e) {
-    if (e.target === imageModal) {
-      imageModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
+  setTimeout(() => {
+    if (!locationPermissionGranted) {
+      getCurrentLocation();
     }
+  }, 1000);
+
+  // Image Selection
+  selectImageBtn.addEventListener('click', function() {
+    imageInput.click();
   });
 
-  // Handle image option selection
-  const imageOptions = document.querySelectorAll('.image-option');
-  imageOptions.forEach(option => {
-    option.addEventListener('click', function() {
-      // Remove previous selection
-      imageOptions.forEach(opt => opt.classList.remove('selected'));
-      
-      // Add selection to current option
-      this.classList.add('selected');
-      
-      // Get the image source and name
-      const img = this.querySelector('img');
-      const imageName = this.getAttribute('data-image');
-      
-      // Set selected image data
-      selectedImage = img.src;
-      selectedImageName = imageName;
-      selectedImageData = {
-        src: img.src,
-        name: imageName,
-        type: 'sample',
-        timestamp: new Date().toISOString(),
-        location: currentLocation,
-        hasLocation: !!currentLocation
-      };
-      
-      // Update preview
-      updateImagePreview(selectedImage, imageName);
-      
-      // Close modal
-      imageModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-      
-      // Enable send button
-      sendImageBtn.disabled = false;
-      
-      // Store image data automatically
-      storeImageData(selectedImageData);
-      
-      // Show success toast
-      showToast('success', 'Image Selected!', `"${imageName}" has been selected successfully.`);
-      
-      console.log('Image selected:', selectedImageData);
-    });
-  });
-
-  // Handle custom image upload
-  customImageInput.addEventListener('change', function(e) {
+  imageInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
       if (file.type.startsWith('image/')) {
@@ -203,17 +148,8 @@ document.addEventListener('DOMContentLoaded', function () {
           updateImagePreview(selectedImage, file.name);
           sendImageBtn.disabled = false;
           
-          // Close modal
-          imageModal.style.display = 'none';
-          document.body.style.overflow = 'auto';
-          
-          // Store image data automatically
-          storeImageData(selectedImageData);
-          
-          // Show success toast
           showToast('success', 'Image Uploaded!', `"${file.name}" has been uploaded successfully.`);
-          
-          console.log('Custom image uploaded:', selectedImageData);
+          console.log('Image uploaded:', selectedImageData);
         };
         reader.readAsDataURL(file);
       } else {
@@ -222,50 +158,45 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Store image data automatically
-  function storeImageData(imageData) {
-    try {
-      // Get existing stored images
-      let storedImages = JSON.parse(localStorage.getItem('forestWatchImages') || '[]');
-      
-      // Add new image data
-      storedImages.push(imageData);
-      
-      // Keep only last 50 images to prevent storage overflow
-      if (storedImages.length > 50) {
-        storedImages = storedImages.slice(-50);
-      }
-      
-      // Store back to localStorage
-      localStorage.setItem('forestWatchImages', JSON.stringify(storedImages));
-      
-      console.log('Image stored successfully. Total stored images:', storedImages.length);
-    } catch (error) {
-      console.error('Error storing image data:', error);
-    }
+  // Update image preview
+  function updateImagePreview(src, name) {
+    imagePreview.src = src;
+    imagePreview.alt = name;
+    imagePreview.style.display = 'block';
+    imagePlaceholder.style.display = 'none';
+    
+    imagePreview.style.opacity = '0';
+    imagePreview.style.transform = 'scale(0.8)';
+    
+    setTimeout(() => {
+      imagePreview.style.transition = 'all 0.3s ease';
+      imagePreview.style.opacity = '1';
+      imagePreview.style.transform = 'scale(1)';
+    }, 100);
   }
 
-  // Send Image Button with enhanced functionality
+  // Send Image Button
   sendImageBtn.addEventListener('click', function() {
     if (selectedImage && selectedImageData) {
+      if (!locationPermissionGranted) {
+        showPopup('Location Required', 'Please allow location access before sending the image. GPS coordinates are required for forest monitoring.');
+        return;
+      }
+
       const originalText = this.textContent;
       this.textContent = 'Sending...';
       this.disabled = true;
       
-      // Simulate sending process
       setTimeout(() => {
         // Update image data with sent status
         selectedImageData.sent = true;
         selectedImageData.sentAt = new Date().toISOString();
         
-        // Store updated data
-        storeImageData(selectedImageData);
-        
         // Create standalone image report for admin page
         const imageReport = {
           id: generateReportId(),
           timestamp: new Date().toISOString(),
-          message: `Image sent: ${selectedImageName}${selectedImageData.hasLocation ? `\nLocation: ${selectedImageData.location.latitude.toFixed(6)}, ${selectedImageData.location.longitude.toFixed(6)}` : '\nNo location data'}`,
+          message: `Image sent: ${selectedImageName}\nLocation: ${selectedImageData.location.latitude.toFixed(6)}, ${selectedImageData.location.longitude.toFixed(6)}`,
           hasImage: true,
           imageData: selectedImageData.src,
           type: 'image-only',
@@ -279,93 +210,27 @@ document.addEventListener('DOMContentLoaded', function () {
         // Store image report in admin format
         storeImageReport(imageReport);
         
-        // Show success message with details
-        const message = `Image "${selectedImageName}" has been sent successfully!\n\n` +
-                       `Type: ${selectedImageData.type}\n` +
-                       `Size: ${selectedImageData.size ? formatFileSize(selectedImageData.size) : 'Sample Image'}\n` +
+        // Show success message
+        const message = `Photo "${selectedImageName}" has been sent successfully!\n\n` +
+                       `Location: ${selectedImageData.location.latitude.toFixed(6)}, ${selectedImageData.location.longitude.toFixed(6)}\n` +
                        `Sent at: ${new Date().toLocaleString()}\n\n` +
-                       `The image is now visible in the admin dashboard.`;
+                       `The photo and location are now visible in the admin dashboard.`;
         
         showPopup('Success', message);
-        
-        // Show toast notification
-        showToast('success', 'Image Sent!', `"${selectedImageName}" has been sent to admin dashboard.`);
+        showToast('success', 'Photo Sent!', `"${selectedImageName}" has been sent to admin dashboard.`);
         
         // Reset button
         this.textContent = originalText;
         this.disabled = false;
         
-        // Don't reset image selection - keep it for form submission
         console.log('Image sent successfully:', selectedImageData);
       }, 1500);
     } else {
-      showPopup('Error', 'Please select an image first.');
+      showPopup('Error', 'Please select a photo first.');
     }
   });
 
-  // Format file size
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  // Update image preview with better styling
-  function updateImagePreview(src, name) {
-    imagePreview.src = src;
-    imagePreview.alt = name;
-    imagePreview.style.display = 'block';
-    imagePlaceholder.style.display = 'none';
-    
-    // Add some animation
-    imagePreview.style.opacity = '0';
-    imagePreview.style.transform = 'scale(0.8)';
-    
-    setTimeout(() => {
-      imagePreview.style.transition = 'all 0.3s ease';
-      imagePreview.style.opacity = '1';
-      imagePreview.style.transform = 'scale(1)';
-    }, 100);
-  }
-
-  // Reset image selection
-  function resetImageSelection() {
-    selectedImage = null;
-    selectedImageName = '';
-    selectedImageData = null;
-    imagePreview.style.display = 'none';
-    imagePlaceholder.style.display = 'flex';
-    sendImageBtn.disabled = true;
-    imageOptions.forEach(opt => opt.classList.remove('selected'));
-    customImageInput.value = '';
-  }
-
-  // Popup Modal Functions
-  function showPopup(title, message) {
-    popupTitle.textContent = title;
-    popupMessage.textContent = message;
-    popupModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-  }
-
-  function hidePopup() {
-    popupModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  }
-
-  closePopup.addEventListener('click', hidePopup);
-  popupOkBtn.addEventListener('click', hidePopup);
-
-  // Close popup when clicking outside
-  popupModal.addEventListener('click', function(e) {
-    if (e.target === popupModal) {
-      hidePopup();
-    }
-  });
-
-  // Enhanced form submission with image data
+  // Form submission
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     
@@ -373,8 +238,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const messageValue = (messageInput.value || '').trim();
     
     if (!mobileValue) {
-      showPopup('Error', 'Please enter a mobile number with your message.');
+      showPopup('Error', 'Please enter your mobile number and describe what you see.');
       input.focus();
+      return;
+    }
+
+    if (!locationPermissionGranted) {
+      showPopup('Location Required', 'Please allow location access before submitting the report. GPS coordinates are required for forest monitoring.');
       return;
     }
 
@@ -403,12 +273,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const successMessage = `Report submitted successfully!\n\n` +
                            `Mobile: ${submissionData.mobile}\n` +
                            `Message: ${submissionData.message || 'No additional message'}\n` +
-                           `Image: ${submissionData.image ? submissionData.image.name : 'No image attached'}\n` +
+                           `Photo: ${submissionData.image ? submissionData.image.name : 'No photo attached'}\n` +
+                           `Location: ${submissionData.location.latitude.toFixed(6)}, ${submissionData.location.longitude.toFixed(6)}\n` +
                            `Time: ${new Date().toLocaleString()}`;
       
       showPopup('Success', successMessage);
-      
-      // Show toast notification
       showToast('success', 'Report Submitted!', 'Your report has been submitted successfully and will appear in the admin dashboard.');
       
       // Reset form
@@ -430,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const report = {
         id: generateReportId(),
         timestamp: new Date().toISOString(),
-        message: submissionData.mobile + (submissionData.message ? '\n\nAdditional Message: ' + submissionData.message : '') + (submissionData.hasLocation ? `\n\nLocation: ${submissionData.location.latitude.toFixed(6)}, ${submissionData.location.longitude.toFixed(6)}` : '\n\nNo location data'),
+        message: submissionData.mobile + (submissionData.message ? '\n\nAdditional Message: ' + submissionData.message : '') + `\n\nLocation: ${submissionData.location.latitude.toFixed(6)}, ${submissionData.location.longitude.toFixed(6)}`,
         hasImage: !!submissionData.image,
         imageData: submissionData.image ? submissionData.image.src : null,
         location: submissionData.location,
@@ -460,6 +329,29 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // Store image report
+  function storeImageReport(imageReport) {
+    try {
+      let reports = JSON.parse(localStorage.getItem('forestWatchReports') || '[]');
+      reports.push(imageReport);
+      
+      if (reports.length > 100) {
+        reports = reports.slice(-100);
+      }
+      
+      localStorage.setItem('forestWatchReports', JSON.stringify(reports));
+      
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'forestWatchReports',
+        newValue: JSON.stringify(reports)
+      }));
+      
+      console.log('Image report stored. Total reports:', reports.length);
+    } catch (error) {
+      console.error('Error storing image report:', error);
+    }
+  }
+
   // Generate unique report ID
   function generateReportId() {
     const timestamp = Date.now().toString(36);
@@ -467,40 +359,37 @@ document.addEventListener('DOMContentLoaded', function () {
     return `FW${timestamp}${random}`.toUpperCase();
   }
 
-  // Add interactive effects
-  const buttons = document.querySelectorAll('button');
-  buttons.forEach(button => {
-    button.addEventListener('mousedown', function() {
-      this.style.transform = 'scale(0.95)';
-    });
-    
-    button.addEventListener('mouseup', function() {
-      this.style.transform = 'scale(1)';
-    });
-    
-    button.addEventListener('mouseleave', function() {
-      this.style.transform = 'scale(1)';
-    });
-  });
+  // Reset image selection
+  function resetImageSelection() {
+    selectedImage = null;
+    selectedImageName = '';
+    selectedImageData = null;
+    imagePreview.style.display = 'none';
+    imagePlaceholder.style.display = 'flex';
+    sendImageBtn.disabled = true;
+    imageInput.value = '';
+  }
 
-  // Keyboard shortcuts
-  document.addEventListener('keydown', function(e) {
-    // Escape key to close modals
-    if (e.key === 'Escape') {
-      if (popupModal.style.display === 'block') {
-        hidePopup();
-      }
-      if (imageModal.style.display === 'block') {
-        imageModal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-    }
-    
-    // Enter key to submit form (when not in textarea)
-    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
-      if (e.target === input || e.target === messageInput) {
-        form.dispatchEvent(new Event('submit'));
-      }
+  // Popup Modal Functions
+  function showPopup(title, message) {
+    popupTitle.textContent = title;
+    popupMessage.textContent = message;
+    popupModal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hidePopup() {
+    popupModal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+
+  closePopup.addEventListener('click', hidePopup);
+  popupOkBtn.addEventListener('click', hidePopup);
+
+  // Close popup when clicking outside
+  popupModal.addEventListener('click', function(e) {
+    if (e.target === popupModal) {
+      hidePopup();
     }
   });
 
@@ -554,9 +443,5 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Initialize the app
-  console.log('Forest Watch App initialized successfully!');
-  console.log('Stored images:', JSON.parse(localStorage.getItem('forestWatchImages') || '[]').length);
-  console.log('Stored submissions:', JSON.parse(localStorage.getItem('forestWatchSubmissions') || '[]').length);
+  console.log('Forest Watch Public Client initialized successfully!');
 });
-
-

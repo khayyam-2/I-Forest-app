@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forest Watch - Public Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="toast-styles.css" />
+    <style>
+        /* Public client specific styles */
+        .public-header {
+            background: linear-gradient(135deg, #0f5f16 0%, #0b4b12 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .public-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .public-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .emergency-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 12px;
+            margin: 20px 0;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .location-warning {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .submit-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="public-header">
+        <h1>🌲 Forest Watch</h1>
+        <p>Report Tree Cutting Activities with GPS Location</p>
+    </header>
+
+    <main class="content">
+        <div class="emergency-notice">
+            ⚠️ This is a public reporting system. Your location will be automatically captured for accurate reporting.
+        </div>
+
+        <section class="card">
+            <div class="location-warning" id="locationWarning" style="display: none;">
+                <strong>Location Required:</strong> Please allow location access to submit reports with GPS coordinates.
+            </div>
+
+            <!-- Location Status -->
+            <div class="location-info">
+                <div id="locationStatus" class="location-status">
+                    <span id="locationIcon">📍</span>
+                    <span id="locationText">Getting your location...</span>
+                </div>
+                <button type="button" id="getLocationBtn" class="btn-location">Get Current Location</button>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="image-upload-section">
+                <h3>📷 Upload Photo of Tree Cutting</h3>
+                <div class="image-preview-container">
+                    <img id="imagePreview" class="image-preview" src="" alt="" style="display: none;" />
+                    <div id="imagePlaceholder" class="image-placeholder">
+                        <span>📷</span>
+                        <p>No image selected</p>
+                    </div>
+                </div>
+                <div class="upload-buttons">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
+                    <button type="button" id="selectImageBtn" class="btn-secondary">Select Photo</button>
+                    <button type="button" id="sendImageBtn" class="btn-primary" disabled>Send Photo with Location</button>
+                </div>
+            </div>
+
+            <!-- Report Form -->
+            <div class="submit-section">
+                <h3>📝 Report Details</h3>
+                <form id="reportForm" class="report-form" novalidate>
+                    <label for="reportInput">Your Mobile Number & Message:</label>
+                    <input
+                        id="reportInput"
+                        type="text"
+                        placeholder="Enter your mobile number and describe what you see..."
+                        autocomplete="tel"
+                        required
+                    />
+
+                    <div class="message-section">
+                        <label for="messageInput">Additional Details:</label>
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Describe the tree cutting activity, number of trees, equipment used, etc."
+                            rows="4"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Submit Report</button>
+                </form>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>🌍 Forest Resource Assessment Section - NCGSA</p>
+            <p>Help protect our forests by reporting illegal activities</p>
+        </footer>
+    </main>
+
+    <!-- Popup Modal -->
+    <div id="popupModal" class="popup-modal">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3 id="popupTitle">Success!</h3>
+                <button id="closePopup" class="close-btn">&times;</button>
+            </div>
+            <div class="popup-body">
+                <p id="popupMessage">Your report has been submitted successfully!</p>
+            </div>
+            <div class="popup-footer">
+                <button id="popupOkBtn" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="public-client.js"></script>
+</body>
+</html>

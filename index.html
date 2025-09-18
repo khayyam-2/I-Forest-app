@@ -1,137 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Forest Watch</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="toast-styles.css" />
-</head>
-<body>
-    <header class="app-header">
-        <div class="status-bar">
-            <!-- Decorative top bar (to resemble the mobile status area spacing) -->
-        </div>
-        <div class="title-bar">
-            <h1>Forest Watch</h1>
-            <a href="admin.html" class="admin-link">Admin Dashboard</a>
-        </div>
-    </header>
-
-    <main class="content">
-        <section class="card">
-            <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Placeholder_logo.svg/512px-Placeholder_logo.svg.png" alt="NCGSA Logo" />
-
-            <div class="map-wrapper">
-                <!-- Using a Google Maps embed as a stand-in for the screenshot image -->
-                <iframe
-                    title="map"
-                    class="map-frame"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d423286.2740642381!2d-118.69192153366429!3d34.0207304945845!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2c0b01f1e3e29%3A0x8e2a1b1f0f9f6b1b!2sLos%20Angeles%2C%20CA!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"></iframe>
-                <div class="google-watermark">Google</div>
-            </div>
-
-            <!-- Image Upload Section -->
-            <div class="image-upload-section">
-                <h3>Upload Forest Image</h3>
-                <div class="image-preview-container">
-                    <img id="imagePreview" class="image-preview" src="" alt="" style="display: none;" />
-                    <div id="imagePlaceholder" class="image-placeholder">
-                        <span>📷</span>
-                        <p>No image selected</p>
-                    </div>
-                </div>
-                <div class="upload-buttons">
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;" />
-                    <button type="button" id="selectImageBtn" class="btn-secondary">Select Image</button>
-                    <button type="button" id="sendImageBtn" class="btn-primary" disabled>Send Image</button>
-                </div>
-            </div>
-
-            <form id="reportForm" class="report-form" novalidate>
-                <label class="sr-only" for="reportInput">Mobile number with message</label>
-                <input
-                    id="reportInput"
-                    type="text"
-                    placeholder="Please enter mobile no with message."
-                    autocomplete="tel"
-                    required
-                />
-
-                <div class="message-section">
-                    <label for="messageInput">Additional Message:</label>
-                    <textarea 
-                        id="messageInput" 
-                        placeholder="Enter your message here..."
-                        rows="3"
-                    ></textarea>
-                </div>
-
-                <button type="submit" class="btn-primary">Submit Report</button>
-            </form>
-        </section>
-
-        <footer class="footer">
-            <p>Develop by Forest Resource Assessment Section of NCGSA.</p>
-        </footer>
-    </main>
-
-    <!-- Popup Modal -->
-    <div id="popupModal" class="popup-modal">
-        <div class="popup-content">
-            <div class="popup-header">
-                <h3 id="popupTitle">Success!</h3>
-                <button id="closePopup" class="close-btn">&times;</button>
-            </div>
-            <div class="popup-body">
-                <p id="popupMessage">Your report has been submitted successfully!</p>
-            </div>
-            <div class="popup-footer">
-                <button id="popupOkBtn" class="btn-primary">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Selection Modal -->
-    <div id="imageModal" class="image-modal">
-        <div class="image-modal-content">
-            <div class="image-modal-header">
-                <h3>Select Image</h3>
-                <button id="closeImageModal" class="close-btn">&times;</button>
-            </div>
-            <div class="image-modal-body">
-                <div class="image-options">
-                    <div class="image-option" data-image="forest1.jpg">
-                        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=150&h=150&fit=crop" alt="Forest 1" />
-                        <span>Forest View 1</span>
-                    </div>
-                    <div class="image-option" data-image="forest2.jpg">
-                        <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=150&h=150&fit=crop" alt="Forest 2" />
-                        <span>Forest View 2</span>
-                    </div>
-                    <div class="image-option" data-image="forest3.jpg">
-                        <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=150&h=150&fit=crop" alt="Forest 3" />
-                        <span>Forest View 3</span>
-                    </div>
-                </div>
-                <div class="custom-upload">
-                    <p>Or upload your own image:</p>
-                    <input type="file" id="customImageInput" accept="image/*" />
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <script src="script.js"></script>
-</body>
+    <title>EduPlatform - Global AI-powered Learning Hub</title>
+    <meta name="description" content="Complete learning platform combining courses, consultations, AI tutoring, and Quran studies in one place." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="font-inter">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
-
-

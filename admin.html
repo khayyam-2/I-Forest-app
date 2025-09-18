@@ -15,7 +15,6 @@
         <div class="title-bar">
             <h1>Forest Watch - Admin Dashboard</h1>
             <nav class="admin-nav">
-                <a href="index.html" class="nav-link">Client View</a>
                 <button id="clearData" class="btn-clear">Clear All Data</button>
             </nav>
         </div>
@@ -32,18 +31,29 @@
                 <span id="reportsWithImages">0</span>
             </div>
             <div class="stat-card">
+                <h3>With Location</h3>
+                <span id="reportsWithLocation">0</span>
+            </div>
+            <div class="stat-card">
                 <h3>Today's Reports</h3>
                 <span id="todayReports">0</span>
             </div>
         </div>
 
         <div class="reports-section">
-            <h2>Submitted Reports</h2>
+            <div class="section-header">
+                <h2>📋 Submitted Reports</h2>
+                <div class="refresh-controls">
+                    <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
+                    <span id="lastUpdate" class="last-update">Last updated: Just now</span>
+                </div>
+            </div>
             <div class="filter-controls">
                 <input type="text" id="searchInput" placeholder="Search reports..." class="search-input" />
                 <select id="filterSelect" class="filter-select">
                     <option value="all">All Reports</option>
                     <option value="with-images">With Images</option>
+                    <option value="with-location">With Location</option>
                     <option value="today">Today Only</option>
                 </select>
             </div>
